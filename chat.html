@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aethor Terminal</title>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: #020510;
+            font-family: 'JetBrains Mono', monospace;
+            color: #d4d4d4;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-sizing: border-box;
+        }
+        /* Terminal UI */
+        
+        #terminal-body {
+            flex: 1;
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+        
+        #terminal-body::-webkit-scrollbar {
+            width: 4px;
+        }
+        
+        #terminal-body::-webkit-scrollbar-thumb {
+            background: #00ff00;
+            border-radius: 2px;
+        }
+        
+        .term-line {
+            font-size: 13px;
+            line-height: 1.6;
+            word-wrap: break-word;
+        }
+        
+        .term-system {
+            color: #5a6880;
+            font-style: italic;
+        }
+        
+        .tag-bot {
+            color: #00d4ff;
+            font-weight: bold;
+        }
+        
+        .tag-user {
+            color: #f59e0b;
+            font-weight: bold;
+        }
+        
+        .term-error {
+            color: #ff5555;
+        }
+        
+        .term-input-wrapper {
+            display: flex;
+            padding: 12px 16px;
+            background: #141a14;
+            border-top: 1px solid #00ff00;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .term-prompt {
+            color: #00ff00;
+            font-size: 13px;
+            font-weight: bold;
+            white-space: nowrap;
+        }
+        
+        #term-input {
+            flex: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: #ffffff;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+        }
+        
+        #term-input::placeholder {
+            color: #4a5a6a;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="terminal-body">
+        <div class="term-line term-system">[SYSTEM] Aethor RAG Terminal v1.0</div>
+        <div class="term-line term-system">[SYSTEM] Ready for queries. Type your question below.</div>
+    </div>
+
+    <div class="term-input-wrapper">
+        <span class="term-prompt">user@aether:~$</span>
+        <input type="text" id="term-input" autocomplete="off" placeholder="Ask about my research..." />
+    </div>
+
+    <script>
+        // 🔴 यहाँ अपना BACKEND API URL डालें (Example: http://localhost:5000/rag)
+        const BACKEND_API_URL = "https://parththaker-rag-backend.onrender.com";
+
+        const termBody = document.getElementById('terminal-body');
+        const termInput = document.getElementById('term-input');
+
+        function appendToTerminal(prefix, text, isError = false) {
+            const line = document.createElement('div');
+            line.className = `term-line ${isError ? 'term-error' : ''}`;
+            line.innerHTML = `<span class="${isError ? 'tag-bot' : prefix === 'USER' ? 'tag-user' : 'tag-bot'}">[${prefix}]:</span> ${text}`;
+            termBody.appendChild(line);
+            termBody.scrollTop = termBody.scrollHeight;
+        }
+
+        async function handleTerminalSubmit() {
+            const text = termInput.value.trim();
+            if (!text) return;
+
+            appendToTerminal('USER', text);
+            termInput.value = '';
+
+            const loadingLine = document.createElement('div');
+            loadingLine.className = 'term-line';
+            loadingLine.innerHTML = `<span class="tag-bot">[AETHOR]:</span> <span style="color:#5a6880">Processing query...</span>`;
+            termBody.appendChild(loadingLine);
+            termBody.scrollTop = termBody.scrollHeight;
+
+            try {
+                const response = await fetch(BACKEND_API_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        message: text
+                    })
+                });
+                loadingLine.remove();
+
+                if (!response.ok) throw new Error(`Server returned ${response.status}`);
+                const data = await response.json();
+                const botReply = data.response || data.answer || data.message || "No response.";
+                appendToTerminal('AETHOR', botReply);
+            } catch (error) {
+                loadingLine.remove();
+                appendToTerminal('ERROR', `Connection error: ${error.message}`, true);
+            }
+        }
+
+        termInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleTerminalSubmit();
+        });
+        // Auto focus on load
+        setTimeout(() => termInput.focus(), 500);
+    </script>
+</body>
+
+</html>

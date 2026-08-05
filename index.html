@@ -1,0 +1,2346 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="dark" />
+    <title>Parth Thaker — Aether Observatory</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+    <style>
+         :root {
+            --bg-deep: #020510;
+            --bg-space: #060d1f;
+            --surface: rgba(10, 16, 36, 0.85);
+            --surface-hover: rgba(14, 22, 48, 0.92);
+            --text-primary: #e8edf8;
+            --text-secondary: #b0bdd4;
+            --text-muted: #5a6880;
+            --accent-blue: #4da8ff;
+            --accent-cyan: #00d4ff;
+            --accent-purple: #a78bfa;
+            --accent-amber: #f59e0b;
+            --accent-emerald: #34d399;
+            --accent-rose: #f472b6;
+            --accent-orange: #fb923c;
+            --border-subtle: rgba(77, 168, 255, 0.12);
+            --border-glow: rgba(77, 168, 255, 0.25);
+            --glow-blue: 0 0 30px rgba(77, 168, 255, 0.25);
+            --glow-cyan: 0 0 30px rgba(0, 212, 255, 0.2);
+            --glow-purple: 0 0 30px rgba(167, 139, 250, 0.2);
+            --radius-sm: 6px;
+            --radius-md: 12px;
+            --radius-lg: 20px;
+            --radius-xl: 28px;
+            --font-mono: 'JetBrains Mono', monospace;
+            --font-sans: 'Plus Jakarta Sans', sans-serif;
+            --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-spring: 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        *,
+        *::before,
+        *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(77, 168, 255, 0.3) transparent;
+        }
+        
+         ::-webkit-scrollbar {
+            width: 5px;
+        }
+        
+         ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        
+         ::-webkit-scrollbar-thumb {
+            background: rgba(77, 168, 255, 0.3);
+            border-radius: 10px;
+        }
+        
+        body {
+            background: var(--bg-deep);
+            color: var(--text-primary);
+            font-family: var(--font-sans);
+            min-height: 100vh;
+            overflow-x: hidden;
+            cursor: crosshair;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        #cosmic-canvas {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        
+        #cursor-glow {
+            position: fixed;
+            pointer-events: none;
+            z-index: 9999;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(77, 168, 255, 0.08) 0%, rgba(0, 212, 255, 0.03) 30%, transparent 70%);
+            transform: translate(-50%, -50%);
+            transition: opacity 0.4s;
+            opacity: 0;
+        }
+        
+        .site-wrapper {
+            position: relative;
+            z-index: 2;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 32px;
+        }
+        /* ── NAV ── */
+        
+        .nav-cosmic {
+            position: sticky;
+            top: 16px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 14px 24px;
+            margin: 16px 0 0;
+            background: var(--surface);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl);
+            transition: var(--transition-smooth);
+            box-shadow: var(--glow-blue);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .nav-cosmic:hover {
+            border-color: var(--border-glow);
+            box-shadow: 0 0 40px rgba(77, 168, 255, 0.3);
+        }
+        
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: 0.15em;
+            color: var(--accent-cyan);
+        }
+        
+        .nav-brand-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            animation: beacon 2s ease-in-out infinite;
+            box-shadow: 0 0 12px var(--accent-cyan);
+        }
+        
+        @keyframes beacon {
+            0%,
+            100% {
+                box-shadow: 0 0 6px var(--accent-cyan);
+            }
+            50% {
+                box-shadow: 0 0 20px var(--accent-cyan), 0 0 40px rgba(0, 212, 255, 0.5);
+            }
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 8px;
+            list-style: none;
+            flex-wrap: wrap;
+        }
+        
+        .nav-links a {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.12em;
+            color: var(--text-muted);
+            text-decoration: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            transition: var(--transition-fast);
+            border: 1px solid transparent;
+            text-transform: uppercase;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--accent-cyan);
+            background: rgba(0, 212, 255, 0.06);
+            border-color: rgba(0, 212, 255, 0.2);
+        }
+        
+        .nav-status {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+        }
+        
+        .nav-status-pulse {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #34d399;
+            animation: pulse-green 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-green {
+            0%,
+            100% {
+                box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.6);
+            }
+            50% {
+                box-shadow: 0 0 0 8px rgba(52, 211, 153, 0);
+            }
+        }
+        /* ── HERO ── */
+        
+        .hero-cosmic {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 40px;
+            padding: 60px 0 40px;
+            align-items: center;
+        }
+        
+        .hero-content {
+            position: relative;
+        }
+        
+        .hero-constellation {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            color: var(--accent-purple);
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .hero-constellation::before {
+            content: '✦';
+            animation: spin-slow 6s linear infinite;
+            display: inline-block;
+            font-size: 14px;
+            color: var(--accent-cyan);
+        }
+        
+        @keyframes spin-slow {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .hero-name {
+            font-size: clamp(44px, 7vw, 80px);
+            font-weight: 800;
+            line-height: 0.9;
+            letter-spacing: -0.03em;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        
+        .hero-name .highlight {
+            background: linear-gradient(135deg, var(--accent-cyan), var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: 300;
+        }
+        
+        .hero-subtitle {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+            margin-bottom: 20px;
+        }
+        
+        .hero-desc {
+            font-size: 15px;
+            line-height: 1.8;
+            color: var(--text-secondary);
+            max-width: 460px;
+            margin-bottom: 28px;
+        }
+        
+        .hero-desc .em {
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+        
+        .hero-ctas {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-stellar {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            color: #020510;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 13px 26px;
+            border: none;
+            cursor: pointer;
+            border-radius: 30px;
+            transition: var(--transition-smooth);
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 0 30px rgba(77, 168, 255, 0.3);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .btn-stellar:hover {
+            box-shadow: 0 0 50px rgba(77, 168, 255, 0.5);
+            transform: translateY(-2px);
+        }
+        
+        .btn-stellar::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transform: translateX(-100%);
+            transition: transform 0.6s;
+        }
+        
+        .btn-stellar:hover::after {
+            transform: translateX(100%);
+        }
+        
+        .btn-orbital {
+            background: transparent;
+            color: var(--accent-cyan);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 13px 26px;
+            border: 1px solid rgba(0, 212, 255, 0.35);
+            cursor: pointer;
+            border-radius: 30px;
+            transition: var(--transition-smooth);
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-orbital:hover {
+            border-color: var(--accent-cyan);
+            background: rgba(0, 212, 255, 0.06);
+            box-shadow: 0 0 25px rgba(0, 212, 255, 0.2);
+        }
+        
+        .btn-cv {
+            background: transparent;
+            color: var(--accent-emerald);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            padding: 13px 26px;
+            border: 1px solid rgba(52, 211, 153, 0.35);
+            cursor: pointer;
+            border-radius: 30px;
+            transition: var(--transition-smooth);
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-cv:hover {
+            border-color: var(--accent-emerald);
+            background: rgba(52, 211, 153, 0.06);
+            box-shadow: 0 0 25px rgba(52, 211, 153, 0.2);
+        }
+        /* ── ORBITAL PROFILE CARD ── */
+        
+        .orbital-card {
+            background: var(--surface);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl);
+            padding: 28px 24px;
+            position: relative;
+            overflow: hidden;
+            transition: var(--transition-smooth);
+            box-shadow: var(--glow-blue);
+        }
+        
+        .orbital-card:hover {
+            border-color: var(--border-glow);
+            box-shadow: 0 0 50px rgba(77, 168, 255, 0.3);
+        }
+        
+        .orbital-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: conic-gradient(from 0deg, transparent, rgba(77, 168, 255, 0.04), transparent, rgba(167, 139, 250, 0.04), transparent);
+            animation: orbit-ring 20s linear infinite;
+            pointer-events: none;
+        }
+        
+        @keyframes orbit-ring {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        .orbital-card-inner {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .orbital-stat-row {
+            display: flex;
+            gap: 16px;
+            margin-top: 16px;
+        }
+        
+        .orbital-stat {
+            flex: 1;
+            text-align: center;
+            padding: 12px;
+            background: rgba(77, 168, 255, 0.04);
+            border-radius: var(--radius-md);
+            border: 1px solid var(--border-subtle);
+        }
+        
+        .orbital-stat-val {
+            font-family: var(--font-mono);
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+        
+        .orbital-stat-lbl {
+            font-size: 9px;
+            letter-spacing: 0.15em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-top: 4px;
+        }
+        
+        .orbital-field {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-secondary);
+            padding: 7px 0;
+            border-bottom: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+        }
+        
+        .orbital-field-key {
+            color: var(--accent-blue);
+        }
+        
+        .orbital-field-val {
+            color: var(--accent-emerald);
+        }
+        /* ── SECTION ORBITS ── */
+        
+        .section-orbit {
+            position: relative;
+            padding: 20px 0;
+        }
+        
+        .section-sigil {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 48px 0 20px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--text-muted);
+            letter-spacing: 0.22em;
+            text-transform: uppercase;
+        }
+        
+        .section-sigil::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: linear-gradient(90deg, var(--border-glow), transparent);
+        }
+        
+        .section-sigil .sigil-icon {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            box-shadow: 0 0 12px var(--accent-cyan);
+            animation: beacon 2s ease-in-out infinite;
+        }
+        /* ── RESEARCH CARDS ── */
+        
+        .research-constellation {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+        
+        .research-star {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 28px 22px;
+            cursor: pointer;
+            transition: var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+            min-height: 200px;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .research-star:hover {
+            border-color: var(--border-glow);
+            box-shadow: var(--glow-blue);
+            transform: translateY(-4px);
+        }
+        
+        .research-star .star-glow {
+            position: absolute;
+            top: -30px;
+            right: -30px;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--accent-glow, rgba(77, 168, 255, 0.25));
+            filter: blur(40px);
+            pointer-events: none;
+            transition: var(--transition-smooth);
+        }
+        
+        .research-star:hover .star-glow {
+            width: 120px;
+            height: 120px;
+            top: -50px;
+            right: -50px;
+        }
+        
+        .research-star .r-id {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            letter-spacing: 0.18em;
+            color: var(--accent-glow-text, var(--accent-blue));
+            margin-bottom: 12px;
+            position: relative;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .research-star .r-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+            margin-bottom: 8px;
+            position: relative;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .research-star .r-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.6;
+            flex: 1;
+            position: relative;
+            z-index: 1;
+            margin-bottom: 12px;
+            pointer-events: none;
+        }
+        
+        .research-star .r-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            position: relative;
+            z-index: 1;
+            pointer-events: none;
+        }
+        
+        .research-star .r-tag {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            padding: 4px 10px;
+            border-radius: 14px;
+            background: rgba(77, 168, 255, 0.07);
+            color: var(--text-muted);
+            border: 1px solid var(--border-subtle);
+            white-space: nowrap;
+        }
+        
+        .research-star .r-explore {
+            margin-top: 14px;
+            font-family: var(--font-mono);
+            font-size: 10px;
+            color: var(--accent-cyan);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: var(--transition-fast);
+            pointer-events: none;
+        }
+        
+        .research-star .r-explore .arrow {
+            transition: var(--transition-fast);
+        }
+        
+        .research-star:hover .r-explore .arrow {
+            transform: translateX(4px);
+        }
+        
+        .r-status-dot {
+            display: inline-block;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            margin-right: 6px;
+        }
+        /* Card action buttons */
+        
+        .card-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .card-actions .btn-orbital {
+            padding: 6px 14px;
+            font-size: 9px;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        /* ── PAPER EXPLAINER MODAL ── */
+        
+        .explainer-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: rgba(2, 5, 16, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.4s;
+        }
+        
+        .explainer-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .explainer-panel {
+            background: var(--bg-space);
+            border: 1px solid var(--border-glow);
+            border-radius: var(--radius-xl);
+            padding: 36px 30px;
+            max-width: 800px;
+            width: 92vw;
+            max-height: 85vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 0 80px rgba(77, 168, 255, 0.25);
+            transform: translateY(20px);
+            transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        .explainer-overlay.active .explainer-panel {
+            transform: translateY(0);
+        }
+        
+        .explainer-close {
+            position: absolute;
+            top: 16px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            color: #fff;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition-fast);
+            z-index: 10;
+        }
+        
+        .explainer-close:hover {
+            background: rgba(255, 80, 80, 0.2);
+            border-color: rgba(255, 80, 80, 0.5);
+        }
+        
+        .explainer-visual {
+            background: rgba(10, 16, 36, 0.7);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            margin: 20px 0;
+            border: 1px solid var(--border-subtle);
+            position: relative;
+            overflow: hidden;
+            min-height: 280px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .explainer-visual svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+        
+        .v-node {
+            position: absolute;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: var(--font-mono);
+            font-weight: 700;
+            color: #fff;
+            text-align: center;
+            animation: float-node 4s ease-in-out infinite;
+            cursor: default;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: var(--transition-smooth);
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.4);
+            z-index: 2;
+        }
+        
+        .v-node:hover {
+            transform: scale(1.15) !important;
+            border-color: #fff;
+            box-shadow: 0 0 40px currentColor;
+            z-index: 5;
+        }
+        
+        .v-node:nth-child(1) {
+            animation-delay: 0s;
+            background: rgba(77, 168, 255, 0.3);
+            color: #4da8ff;
+        }
+        
+        .v-node:nth-child(2) {
+            animation-delay: 0.6s;
+            background: rgba(167, 139, 250, 0.3);
+            color: #a78bfa;
+        }
+        
+        .v-node:nth-child(3) {
+            animation-delay: 1.2s;
+            background: rgba(52, 211, 153, 0.3);
+            color: #34d399;
+        }
+        
+        .v-node:nth-child(4) {
+            animation-delay: 1.8s;
+            background: rgba(245, 158, 11, 0.3);
+            color: #f59e0b;
+        }
+        
+        .v-node:nth-child(5) {
+            animation-delay: 2.4s;
+            background: rgba(244, 114, 182, 0.3);
+            color: #f472b6;
+        }
+        
+        @keyframes float-node {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            25% {
+                transform: translateY(-12px);
+            }
+            50% {
+                transform: translateY(-4px);
+            }
+            75% {
+                transform: translateY(-16px);
+            }
+        }
+        
+        .explainer-section {
+            margin: 16px 0;
+        }
+        
+        .explainer-section h4 {
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.15em;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+        
+        .explainer-section p {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+        
+        .explainer-metric-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 12px 0;
+        }
+        
+        .explainer-metric {
+            flex: 1;
+            min-width: 80px;
+            background: rgba(77, 168, 255, 0.05);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 14px;
+            text-align: center;
+        }
+        
+        .explainer-metric .m-val {
+            font-family: var(--font-mono);
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--accent-cyan);
+        }
+        
+        .explainer-metric .m-lbl {
+            font-size: 9px;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+        /* ── PIPELINE DIAGRAM ── */
+        
+        .pipeline-diagram {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 22px;
+            padding: 6px 2px;
+        }
+        
+        .pipeline-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 0;
+        }
+        
+        .pipeline-row-label {
+            font-family: var(--font-mono);
+            font-size: 8.5px;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        
+        .flow-box {
+            --box-color: var(--accent-blue);
+            background: rgba(255, 255, 255, 0.03);
+            border: 1.5px solid var(--box-color);
+            border-radius: 12px;
+            padding: 9px 12px;
+            min-width: 92px;
+            max-width: 128px;
+            text-align: center;
+            box-shadow: 0 0 16px rgba(77, 168, 255, 0.25);
+            transition: var(--transition-fast);
+            position: relative;
+        }
+        
+        .flow-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 26px rgba(77, 168, 255, 0.45);
+        }
+        
+        .flow-box .fb-title {
+            font-family: var(--font-mono);
+            font-size: 10.5px;
+            font-weight: 700;
+            color: #fff;
+            line-height: 1.3;
+        }
+        
+        .flow-box .fb-sub {
+            font-size: 8.5px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            line-height: 1.4;
+            font-family: var(--font-mono);
+        }
+        
+        .flow-arrow {
+            width: 30px;
+            height: 30px;
+            flex-shrink: 0;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .flow-arrow .fa-line {
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(255, 255, 255, 0.08), var(--line-color, var(--accent-cyan)));
+            position: relative;
+        }
+        
+        .flow-arrow .fa-line::after {
+            content: '';
+            position: absolute;
+            right: -1px;
+            top: 50%;
+            transform: translateY(-50%);
+            border-left: 6px solid var(--line-color, var(--accent-cyan));
+            border-top: 4px solid transparent;
+            border-bottom: 4px solid transparent;
+        }
+        
+        .flow-arrow .fa-dot {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--line-color, var(--accent-cyan));
+            box-shadow: 0 0 8px var(--line-color, var(--accent-cyan));
+            transform: translateY(-50%);
+            animation: flow-travel 1.8s linear infinite;
+        }
+        
+        @keyframes flow-travel {
+            0% {
+                left: 0%;
+                opacity: 0;
+            }
+            12% {
+                opacity: 1;
+            }
+            88% {
+                opacity: 1;
+            }
+            100% {
+                left: 94%;
+                opacity: 0;
+            }
+        }
+        
+        .flow-branches {
+            display: flex;
+            align-items: flex-start;
+            justify-content: center;
+            gap: 28px;
+            flex-wrap: wrap;
+            padding-top: 4px;
+            border-top: 1px dashed var(--border-subtle);
+            margin-top: 4px;
+        }
+        
+        .flow-branch {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .flow-vline {
+            width: 2px;
+            height: 22px;
+            background: repeating-linear-gradient(180deg, var(--line-color, var(--accent-purple)) 0 4px, transparent 4px 8px);
+            position: relative;
+        }
+        
+        .flow-vline .fv-dot {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--line-color, var(--accent-purple));
+            box-shadow: 0 0 8px var(--line-color, var(--accent-purple));
+            transform: translateX(-50%);
+            animation: flow-travel-v 1.6s linear infinite;
+        }
+        
+        @keyframes flow-travel-v {
+            0% {
+                top: 0%;
+                opacity: 0;
+            }
+            15% {
+                opacity: 1;
+            }
+            85% {
+                opacity: 1;
+            }
+            100% {
+                top: 92%;
+                opacity: 0;
+            }
+        }
+        
+        .flow-caption {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--text-muted);
+            text-align: center;
+            letter-spacing: 0.05em;
+            margin-top: 2px;
+            max-width: 640px;
+        }
+        
+        .flow-caption strong {
+            color: var(--accent-cyan);
+        }
+        
+        @media(max-width:600px) {
+            .flow-arrow {
+                width: 18px;
+            }
+            .flow-box {
+                min-width: 78px;
+                padding: 7px 8px;
+            }
+            .flow-box .fb-title {
+                font-size: 9px;
+            }
+            .flow-box .fb-sub {
+                font-size: 7.5px;
+            }
+            .flow-branches {
+                gap: 16px;
+            }
+        }
+        
+        @media(prefers-reduced-motion:reduce) {
+            .fa-dot,
+            .fv-dot {
+                animation: none !important;
+            }
+        }
+        /* ── STACK ── */
+        
+        .stack-constellation {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        
+        .stack-cluster {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-lg);
+            padding: 22px 18px;
+            transition: var(--transition-smooth);
+        }
+        
+        .stack-cluster:hover {
+            border-color: var(--border-glow);
+            box-shadow: var(--glow-blue);
+        }
+        
+        .stack-cluster-title {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            letter-spacing: 0.15em;
+            color: var(--accent-cyan);
+            text-transform: uppercase;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .stack-cluster-title::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+        }
+        
+        .stack-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 9px 10px;
+            border-radius: var(--radius-sm);
+            margin-bottom: 4px;
+            transition: var(--transition-fast);
+            font-size: 12px;
+            color: var(--text-secondary);
+            border: 1px solid transparent;
+        }
+        
+        .stack-item:hover {
+            background: rgba(77, 168, 255, 0.06);
+            border-color: var(--border-subtle);
+            color: #fff;
+        }
+        
+        .stack-item .si-level {
+            font-family: var(--font-mono);
+            font-size: 8px;
+            padding: 3px 8px;
+            border-radius: 10px;
+            letter-spacing: 0.08em;
+            border: 1px solid;
+        }
+        /* ── COLLABORATE ── */
+        
+        .collaborate-constellation {
+            display: grid;
+            grid-template-columns: 1fr 1.3fr;
+            gap: 16px;
+        }
+        
+        .collaborate-info-panel {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl);
+            padding: 32px 26px;
+            transition: var(--transition-smooth);
+        }
+        
+        .collaborate-info-panel:hover {
+            border-color: var(--border-glow);
+            box-shadow: var(--glow-blue);
+        }
+        
+        .collaborate-form-panel {
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-xl);
+            padding: 32px 26px;
+            transition: var(--transition-smooth);
+        }
+        
+        .collaborate-form-panel:hover {
+            border-color: var(--border-glow);
+            box-shadow: var(--glow-blue);
+        }
+        
+        .form-cosmic input,
+        .form-cosmic textarea {
+            width: 100%;
+            background: rgba(10, 16, 36, 0.6);
+            border: 1px solid var(--border-subtle);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            color: #fff;
+            font-family: var(--font-sans);
+            font-size: 13px;
+            transition: var(--transition-fast);
+            outline: none;
+            resize: vertical;
+            margin-bottom: 12px;
+        }
+        
+        .form-cosmic input:focus,
+        .form-cosmic textarea:focus {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.15);
+        }
+        
+        .form-cosmic input::placeholder,
+        .form-cosmic textarea::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .form-cosmic .btn-stellar {
+            width: 100%;
+            text-align: center;
+        }
+        
+        .form-status-msg {
+            margin-top: 10px;
+            padding: 10px 14px;
+            border-radius: var(--radius-md);
+            font-family: var(--font-mono);
+            font-size: 10px;
+            letter-spacing: 0.05em;
+            display: none;
+        }
+        
+        .form-status-msg.success {
+            display: block;
+            background: rgba(52, 211, 153, 0.08);
+            border: 1px solid rgba(52, 211, 153, 0.35);
+            color: #34d399;
+        }
+        
+        .form-status-msg.error {
+            display: block;
+            background: rgba(244, 114, 114, 0.08);
+            border: 1px solid rgba(244, 114, 114, 0.35);
+            color: #f47272;
+        }
+        
+        .collaborate-link-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 14px;
+            border-radius: var(--radius-md);
+            text-decoration: none;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 11px;
+            transition: var(--transition-fast);
+            border: 1px solid transparent;
+            margin-bottom: 6px;
+        }
+        
+        .collaborate-link-item:hover {
+            background: rgba(77, 168, 255, 0.05);
+            border-color: var(--border-subtle);
+            color: #fff;
+        }
+        
+        .collaborate-link-icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            background: rgba(77, 168, 255, 0.08);
+            flex-shrink: 0;
+        }
+        /* ── FOOTER ── */
+        
+        .footer-cosmic {
+            padding: 24px 0;
+            margin-top: 48px;
+            border-top: 1px solid var(--border-subtle);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        /* ── RESPONSIVE ── */
+        
+        @media(max-width:1000px) {
+            .hero-cosmic {
+                grid-template-columns: 1fr;
+                gap: 24px;
+                padding: 40px 0 24px;
+            }
+            .research-constellation {
+                grid-template-columns: 1fr 1fr;
+            }
+            .stack-constellation {
+                grid-template-columns: 1fr 1fr;
+            }
+            .collaborate-constellation {
+                grid-template-columns: 1fr;
+            }
+            .nav-links {
+                gap: 4px;
+            }
+            .nav-links a {
+                padding: 6px 10px;
+                font-size: 9px;
+            }
+            .nav-status {
+                display: none;
+            }
+        }
+        
+        @media(max-width:600px) {
+            .site-wrapper {
+                padding: 0 12px;
+            }
+            .research-constellation {
+                grid-template-columns: 1fr;
+            }
+            .stack-constellation {
+                grid-template-columns: 1fr;
+            }
+            .hero-name {
+                font-size: 36px;
+            }
+            .nav-cosmic {
+                padding: 10px 14px;
+                border-radius: var(--radius-lg);
+                flex-wrap: wrap;
+                gap: 8px;
+            }
+            .nav-links a {
+                font-size: 8px;
+                padding: 5px 8px;
+            }
+            .orbital-stat-row {
+                flex-direction: column;
+            }
+            .explainer-panel {
+                padding: 20px 14px;
+                max-height: 90vh;
+            }
+            .explainer-visual {
+                padding: 16px;
+                min-height: 220px;
+            }
+            .v-node {
+                font-size: 8px !important;
+                width: 50px !important;
+                height: 50px !important;
+            }
+            .footer-cosmic {
+                flex-direction: column;
+                text-align: center;
+            }
+        }
+        
+        @media(prefers-reduced-motion:reduce) {
+            .v-node,
+            .orbital-card::before,
+            .hero-constellation::before,
+            .nav-brand-dot,
+            .nav-status-pulse,
+            .research-star .star-glow,
+            #cosmic-canvas {
+                animation: none !important;
+            }
+        }
+        /* ====================================================== */
+        /* --- NEW: AETHOR POPUP & FLOATING BUTTON (Added here) --- */
+        /* ====================================================== */
+        
+        #aethor-chat-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(2, 5, 16, 0.85);
+            backdrop-filter: blur(8px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 99999;
+        }
+        
+        #aethor-chat-container.active {
+            display: flex;
+        }
+        
+        #aethor-iframe-wrapper {
+            width: 90vw;
+            max-width: 650px;
+            height: 85vh;
+            max-height: 650px;
+            background: #020510;
+            border: 1.5px solid #00ff00;
+            border-radius: 12px;
+            box-shadow: 0 0 50px rgba(0, 255, 0, 0.3);
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        #aethor-iframe-wrapper iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            display: block;
+        }
+        
+        #aethor-close-btn {
+            position: absolute;
+            top: 12px;
+            right: 16px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid #555;
+            color: #ddd;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            z-index: 10;
+            font-size: 18px;
+            transition: 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        #aethor-close-btn:hover {
+            background: #ff4444;
+            border-color: #ff4444;
+            color: white;
+        }
+        
+        #aethor-round-btn {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 9999;
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            border: 2px solid #00d4ff;
+            box-shadow: 0 0 30px rgba(0, 212, 255, 0.6);
+            background: #060d1f;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+            padding: 5px;
+            animation: float-mascot 3s ease-in-out infinite;
+        }
+        
+        #aethor-round-btn:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 40px rgba(0, 212, 255, 0.8);
+        }
+        
+        #aethor-round-btn img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        
+        @keyframes float-mascot {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-8px);
+            }
+        }
+        
+        @media (max-width: 600px) {
+            #aethor-round-btn {
+                width: 60px;
+                height: 60px;
+                bottom: 16px;
+                right: 16px;
+            }
+            #aethor-iframe-wrapper {
+                width: 98vw;
+                height: 95vh;
+                max-height: 95vh;
+            }
+        }
+        /* ====================================================== */
+    </style>
+</head>
+
+<body>
+
+    <!-- COSMIC CANVAS -->
+    <canvas id="cosmic-canvas" aria-hidden="true"></canvas>
+    <div id="cursor-glow" aria-hidden="true"></div>
+
+    <!-- MAIN SITE -->
+    <div class="site-wrapper">
+
+        <!-- NAV -->
+        <nav class="nav-cosmic" aria-label="Main navigation">
+            <div class="nav-brand">
+                <div class="nav-brand-dot"></div>
+                P<span style="color:var(--text-muted)">.</span>THAKER
+            </div>
+            <ul class="nav-links">
+                <li><a href="#research" class="active">Research</a></li>
+                <li><a href="#projects">Projects</a></li>
+                <li><a href="#stack">Stack</a></li>
+                <li><a href="#collaborate">Collaborate</a></li>
+            </ul>
+            <div class="nav-status">
+                <div class="nav-status-pulse"></div>
+                OPEN TO COLLAB
+            </div>
+        </nav>
+
+        <!-- HERO -->
+        <section class="hero-cosmic" aria-labelledby="hero-name">
+            <div class="hero-content">
+                <div class="hero-constellation">✦ AI/ML Research Observatory</div>
+                <h1 class="hero-name" id="hero-name">Parth<br><span class="highlight">Thaker</span></h1>
+                <p class="hero-subtitle">MTech AI/ML · ADIT, Gujarat · GPA 9.2/10</p>
+                <p class="hero-desc">
+                    An AI researcher working on <span class="em">robustness</span>,
+                    <span class="em">fairness</span>, and <span class="em">safety</span> across computer vision and NLP systems. Research explores failure modes in object detection, bias in routing architectures, and cross-lingual safety in LLMs — supported
+                    by <span class="em">retrieval-augmented generation</span> and systematic evaluation. Committed to building AI that is reliable, auditable, and performant beyond the benchmark.
+                </p>
+                <div class="hero-ctas">
+                    <a href="#research" class="btn-stellar">Explore Papers ↗</a>
+                    <a href="https://drive.google.com/uc?export=download&id=1jJdeC-4Irp6h2Xta_sDEBNjQShrxBqLp" download class="btn-cv">📑 Download CV</a>
+                </div>
+            </div>
+            <div class="orbital-card">
+                <div class="orbital-card-inner">
+                    <div style="font-family:var(--font-mono);font-size:10px;color:var(--accent-cyan);letter-spacing:0.12em;margin-bottom:14px;">
+                        📡 TELEMETRY DATA
+                    </div>
+                    <div class="orbital-field">
+                        <span class="orbital-field-key">name</span>
+                        <span class="orbital-field-val">"Parth Thaker"</span>
+                    </div>
+                    <div class="orbital-field">
+                        <span class="orbital-field-key">degree</span>
+                        <span class="orbital-field-val">"MTech AI/ML"</span>
+                    </div>
+                    <div class="orbital-field">
+                        <span class="orbital-field-key">gpa</span>
+                        <span class="orbital-field-val">9.2 / 10</span>
+                    </div>
+                    <div class="orbital-field">
+                        <span class="orbital-field-key">framework</span>
+                        <span class="orbital-field-val">"Sovereign Reliability"</span>
+                    </div>
+                    <div class="orbital-field">
+                        <span class="orbital-field-key">papers</span>
+                        <span class="orbital-field-val">3 active</span>
+                    </div>
+                    <div class="orbital-stat-row">
+                        <div class="orbital-stat">
+                            <div class="orbital-stat-val">3</div>
+                            <div class="orbital-stat-lbl">Papers</div>
+                        </div>
+                        <div class="orbital-stat">
+                            <div class="orbital-stat-val">9.2</div>
+                            <div class="orbital-stat-lbl">GPA</div>
+                        </div>
+                        <div class="orbital-stat">
+                            <div class="orbital-stat-val" id="project-count">1</div>
+                            <div class="orbital-stat-lbl">Projects</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- RESEARCH CARDS -->
+        <section id="research" class="section-orbit" aria-labelledby="research-heading">
+            <div class="section-sigil" id="research-heading">
+                <span class="sigil-icon"></span> 01 — Research Papers
+            </div>
+            <p style="font-size:13px;color:var(--text-muted);margin-bottom:16px;line-height:1.6;">
+                Click any card to open an <span style="color:var(--accent-cyan);">interactive, animated architecture breakdown</span> — or download the PDF directly.
+            </p>
+            <div class="research-constellation">
+
+                <!-- PAPER 1 -->
+                <article class="research-star" style="--accent-glow:rgba(77,168,255,0.3);--accent-glow-text:#4da8ff;" onclick="openExplainer('paper1')">
+                    <div class="star-glow"></div>
+                    <div class="r-id">PAPER-01 · IEEE ACCESS</div>
+                    <h2 class="r-title">Failure Geometry in Object Detection</h2>
+                    <p class="r-desc">4D failure vector &amp; mCRS metric across YOLOv8, DETR, RT-DETR on 17 corruptions.</p>
+                    <div class="r-tags">
+                        <span class="r-tag">YOLOv8</span><span class="r-tag">DETR</span><span class="r-tag">mCRS</span><span class="r-tag">Robustness</span>
+                    </div>
+                    <div class="r-explore">
+                        <span class="r-status-dot" style="background:#f59e0b;"></span> Writing Phase —
+                        <span class="arrow">Explore →</span>
+                    </div>
+                    <div class="card-actions">
+                        <a href="https://drive.google.com/uc?export=download&id=1_4viuWqAJymywDXWedJm2QwAHLx8Z3Jl" download onclick="event.stopPropagation();" class="btn-orbital" style="border-color:#4da8ff;color:#4da8ff;">
+                            📄 Download PDF
+                        </a>
+                    </div>
+                </article>
+
+                <!-- PAPER 2 -->
+                <article class="research-star" style="--accent-glow:rgba(167,139,250,0.3);--accent-glow-text:#a78bfa;" onclick="openExplainer('paper2')">
+                    <div class="star-glow"></div>
+                    <div class="r-id">PAPER-02 · IEEE ACCESS</div>
+                    <h2 class="r-title">FairTree &amp; Fairness Disconnect Index</h2>
+                    <p class="r-desc">Routing fairness ≠ representation fairness in MoE. Validated via FDI across 5 datasets.</p>
+                    <div class="r-tags">
+                        <span class="r-tag">MoE</span><span class="r-tag">Fairness</span><span class="r-tag">FDI</span><span class="r-tag">GRL</span>
+                    </div>
+                    <div class="r-explore">
+                        <span class="r-status-dot" style="background:#f59e0b;"></span> Submission Ready —
+                        <span class="arrow">Explore →</span>
+                    </div>
+                    <div class="card-actions">
+                        <a href="https://drive.google.com/uc?export=download&id=1nBZZ0fMoq2Ue9mSzXRLWSsDhBGC5Tn9Z" download onclick="event.stopPropagation();" class="btn-orbital" style="border-color:#a78bfa;color:#a78bfa;">
+                            📄 Download PDF
+                        </a>
+                    </div>
+                </article>
+
+                <!-- PAPER 3 -->
+                <article class="research-star" style="--accent-glow:rgba(52,211,153,0.3);--accent-glow-text:#34d399;" onclick="openExplainer('paper3')">
+                    <div class="star-glow"></div>
+                    <div class="r-id">PAPER-03 · EMNLP WS</div>
+                    <h2 class="r-title">Cross-Lingual Safety in LLMs</h2>
+                    <p class="r-desc">Mechanistic interpretability: Apertus 8B vs Llama-3 8B in English × Gujarati.</p>
+                    <div class="r-tags">
+                        <span class="r-tag">Apertus</span><span class="r-tag">CLGI</span><span class="r-tag">IndicTrans2</span><span class="r-tag">Safety</span>
+                    </div>
+                    <div class="r-explore">
+                        <span class="r-status-dot" style="background:#4da8ff;"></span> In Progress —
+                        <span class="arrow">Explore →</span>
+                    </div>
+                    <div class="card-actions">
+                        <a href="papers/cross-lingual-safety.pdf" download onclick="event.stopPropagation();" class="btn-orbital" style="border-color:#34d399;color:#34d399;">
+                            📄 Download PDF
+                        </a>
+                    </div>
+                </article>
+
+            </div>
+        </section>
+
+        <!-- PROJECTS -->
+        <section id="projects" class="section-orbit" aria-labelledby="projects-heading">
+            <div class="section-sigil" id="projects-heading">
+                <span class="sigil-icon"></span> 02 — Projects
+            </div>
+            <div class="research-constellation" style="grid-template-columns:repeat(auto-fit, minmax(260px, 1fr));">
+
+                <!-- Project 1 -->
+                <article class="research-star project-item" style="--accent-glow:rgba(0,212,255,0.3);--accent-glow-text:#00d4ff;cursor:default;">
+                    <div class="star-glow"></div>
+                    <div class="r-id">PROJECT · RAG SYSTEM</div>
+                    <h2 class="r-title">Echidna RAG</h2>
+                    <p class="r-desc">A retrieval-augmented generation pipeline — deployed live and fully open-sourced, end to end.</p>
+                    <div class="r-tags">
+                        <span class="r-tag">RAG</span><span class="r-tag">LLM</span><span class="r-tag">Python</span><span class="r-tag">Render</span>
+                    </div>
+                    <div style="display:flex;gap:8px;margin-top:14px;flex-wrap:wrap;position:relative;z-index:2;">
+                        <a href="https://echidna-rag.onrender.com/" target="_blank" rel="noopener" class="btn-orbital" style="padding:8px 16px;font-size:9px;">🚀 Live Demo ↗</a>
+                        <a href="https://github.com/ParthThaker007-ai/echidna-rag/tree/a7ef50054bb8dc4eb74bd9998967555a21807881" target="_blank" rel="noopener" class="btn-orbital" style="padding:8px 16px;font-size:9px;">🐙 GitHub ↗</a>
+                    </div>
+                </article>
+
+                <!-- Future projects will auto-increment the count -->
+            </div>
+        </section>
+
+        <!-- STACK -->
+        <section id="stack" class="section-orbit" aria-labelledby="stack-heading">
+            <div class="section-sigil" id="stack-heading">
+                <span class="sigil-icon"></span> 03 — Tech Stack
+            </div>
+            <div class="stack-constellation">
+                <div class="stack-cluster">
+                    <div class="stack-cluster-title">Languages & Frameworks</div>
+                    <div class="stack-item">🐍 Python <span class="si-level" style="color:#4da8ff;border-color:#4da8ff;">Expert</span></div>
+                    <div class="stack-item">🔥 PyTorch <span class="si-level" style="color:#4da8ff;border-color:#4da8ff;">Advanced</span></div>
+                    <div class="stack-item">🤗 Transformers <span class="si-level" style="color:#4da8ff;border-color:#4da8ff;">Advanced</span></div>
+                    <div class="stack-item">📊 Scikit-learn <span class="si-level" style="color:#4da8ff;border-color:#4da8ff;">Advanced</span></div>
+                    <div class="stack-item">⚡ NumPy/Pandas <span class="si-level" style="color:#4da8ff;border-color:#4da8ff;">Expert</span></div>
+                </div>
+                <div class="stack-cluster">
+                    <div class="stack-cluster-title">AI Research Tools</div>
+                    <div class="stack-item">👁️ YOLOv8 / DETR <span class="si-level" style="color:#a78bfa;border-color:#a78bfa;">Advanced</span></div>
+                    <div class="stack-item">🧠 IndicTrans2 <span class="si-level" style="color:#a78bfa;border-color:#a78bfa;">Advanced</span></div>
+                    <div class="stack-item">⚖️ Fairness / GRL <span class="si-level" style="color:#a78bfa;border-color:#a78bfa;">Research</span></div>
+                    <div class="stack-item">🔬 Mech. Interp. <span class="si-level" style="color:#a78bfa;border-color:#a78bfa;">Research</span></div>
+                    <div class="stack-item">📐 LaTeX / IEEE <span class="si-level" style="color:#a78bfa;border-color:#a78bfa;">Advanced</span></div>
+                </div>
+                <div class="stack-cluster">
+                    <div class="stack-cluster-title">Platforms & Infra</div>
+                    <div class="stack-item">🤗 HF Hub <span class="si-level" style="color:#34d399;border-color:#34d399;">Advanced</span></div>
+                    <div class="stack-item">🚀 Vast.ai (A100) <span class="si-level" style="color:#34d399;border-color:#34d399;">Intermediate</span></div>
+                    <div class="stack-item">☁️ Colab Pro <span class="si-level" style="color:#34d399;border-color:#34d399;">Expert</span></div>
+                    <div class="stack-item">🐙 Git/GitHub <span class="si-level" style="color:#34d399;border-color:#34d399;">Advanced</span></div>
+                    <div class="stack-item">🐧 Linux/Bash <span class="si-level" style="color:#34d399;border-color:#34d399;">Advanced</span></div>
+                </div>
+                <div class="stack-cluster">
+                    <div class="stack-cluster-title">Languages & Domains</div>
+                    <div class="stack-item">🇮🇳 Gujarati <span class="si-level" style="color:#f59e0b;border-color:#f59e0b;">Native</span></div>
+                    <div class="stack-item">🇮🇳 Hindi <span class="si-level" style="color:#f59e0b;border-color:#f59e0b;">Native</span></div>
+                    <div class="stack-item">🇬🇧 English <span class="si-level" style="color:#f59e0b;border-color:#f59e0b;">Professional</span></div>
+                    <div class="stack-item">🎯 CV/NLP/Fairness <span class="si-level" style="color:#f59e0b;border-color:#f59e0b;">Research</span></div>
+                    <div class="stack-item">📄 IEEE/ACL Pub. <span class="si-level" style="color:#f59e0b;border-color:#f59e0b;">Active</span></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- COLLABORATE -->
+        <section id="collaborate" class="section-orbit" aria-labelledby="collaborate-heading">
+            <div class="section-sigil" id="collaborate-heading">
+                <span class="sigil-icon"></span> 04 — Let's Collaborate on Research
+            </div>
+            <div class="collaborate-constellation">
+                <div class="collaborate-info-panel">
+                    <h3 style="font-size:18px;font-weight:700;color:#fff;margin-bottom:12px;">Let's Connect</h3>
+                    <p style="font-size:13px;color:var(--text-secondary);line-height:1.7;margin-bottom:20px;">
+                        Professors, collaborators, fellow researchers — I read every transmission.
+                    </p>
+                    <a href="mailto:thakerparth12@gmail.com" class="collaborate-link-item">
+                        <div class="collaborate-link-icon">✉️</div> thakerparth12@gmail.com
+                    </a>
+                    <a href="https://github.com/" target="_blank" rel="noopener" class="collaborate-link-item">
+                        <div class="collaborate-link-icon">🐙</div> github.com/partthaker
+                    </a>
+                    <a href="https://linkedin.com/" target="_blank" rel="noopener" class="collaborate-link-item">
+                        <div class="collaborate-link-icon">💼</div> linkedin.com/in/partthaker
+                    </a>
+                    <div style="margin-top:16px;padding:16px;background:rgba(52,211,153,0.05);border-radius:var(--radius-md);border:1px solid rgba(52,211,153,0.15);">
+                        <p style="font-family:var(--font-mono);font-size:9px;color:var(--accent-emerald);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:4px;">
+                            📑 Download CV
+                        </p>
+                        <a href="https://drive.google.com/uc?export=download&id=1jJdeC-4Irp6h2Xta_sDEBNjQShrxBqLp" download class="btn-cv" style="padding:10px 20px;font-size:10px;width:100%;text-align:center;">
+                            ⬇ Download My CV
+                        </a>
+                    </div>
+                </div>
+                <div class="collaborate-form-panel">
+                    <div style="font-family:var(--font-mono);font-size:10px;color:var(--accent-cyan);letter-spacing:0.12em;margin-bottom:16px;">
+                        $ send_collaboration_request
+                    </div>
+                    <div class="form-cosmic">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+                            <input type="text" id="msg-name" placeholder="Your Name" autocomplete="name" />
+                            <input type="email" id="msg-email" placeholder="Your Email" autocomplete="email" />
+                        </div>
+                        <input type="text" id="msg-subject" placeholder="Research Topic / Collaboration Idea" />
+                        <textarea id="msg-body" rows="4" placeholder="Tell me about your research, project, or collaboration idea..."></textarea>
+                        <button class="btn-stellar" onclick="sendMessage()" style="cursor:pointer;">
+                            <span id="btn-text">Send Collaboration Request</span> →
+                        </button>
+                        <div class="form-status-msg" id="form-status"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer class="footer-cosmic">
+            <span>© 2026 PARTH THAKER · SOVEREIGN RELIABILITY FRAMEWORK</span>
+            <span>📍 23.0225° N, 72.5714° E · AHMEDABAD, IN</span>
+        </footer>
+    </div>
+
+    <!-- ============================================================ -->
+    <!-- UPDATED: AETHOR CHAT BUTTON & POPUP (Replaces Old Brain IFrame) -->
+    <!-- ============================================================ -->
+
+    <!-- AETHOR CHAT POPUP -->
+    <div id="aethor-chat-container">
+        <div id="aethor-iframe-wrapper">
+            <button id="aethor-close-btn">✕</button>
+            <!-- 🔴 यहाँ chat.html को लोड किया जा रहा है -->
+            <iframe src="chat.html" title="Aethor RAG Terminal"></iframe>
+        </div>
+    </div>
+
+    <!-- AETHOR FLOATING BUTTON -->
+    <button id="aethor-round-btn">
+        <img src="aethor-icon.png" alt="Aethor">
+    </button>
+
+    <!-- PAPER EXPLAINER OVERLAY -->
+    <div class="explainer-overlay" id="explainer-overlay" onclick="closeExplainer(event)">
+        <div class="explainer-panel" id="explainer-panel" onclick="event.stopPropagation()">
+            <button class="explainer-close" onclick="closeExplainer()">✕</button>
+            <div id="explainer-content"></div>
+        </div>
+    </div>
+
+    <script>
+        /* ───────────────────────────────
+                   COSMIC PARTICLE FIELD
+                   ─────────────────────────────── */
+        const canvas = document.getElementById('cosmic-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+        let mouseX = -500;
+        let mouseY = -500;
+        let w, h;
+
+        function resizeCanvas() {
+            w = canvas.width = window.innerWidth;
+            h = canvas.height = window.innerHeight;
+        }
+        resizeCanvas();
+        window.addEventListener('resize', () => {
+            resizeCanvas();
+            initParticles();
+        });
+
+        class Particle {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * w;
+                this.y = Math.random() * h;
+                this.size = Math.random() * 1.6 + 0.4;
+                this.speedX = (Math.random() - 0.5) * 0.35;
+                this.speedY = (Math.random() - 0.5) * 0.35;
+                this.opacity = Math.random() * 0.6 + 0.2;
+                this.hue = ['#4da8ff', '#a78bfa', '#34d399', '#00d4ff', '#f59e0b', '#f472b6'][
+                    Math.floor(Math.random() * 6)
+                ];
+                this.twinkleSpeed = Math.random() * 0.02 + 0.005;
+                this.twinkleOffset = Math.random() * Math.PI * 2;
+            }
+            update(mx, my) {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                const dx = mx - this.x;
+                const dy = my - this.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+                if (dist < 200 && dist > 1) {
+                    const force = 0.015;
+                    this.speedX += (dx / dist) * force;
+                    this.speedY += (dy / dist) * force;
+                }
+                this.speedX *= 0.999;
+                this.speedY *= 0.999;
+                if (this.x < -20) this.x = w + 20;
+                if (this.x > w + 20) this.x = -20;
+                if (this.y < -20) this.y = h + 20;
+                if (this.y > h + 20) this.y = -20;
+                this.currentOpacity = this.opacity + Math.sin(Date.now() * this.twinkleSpeed + this.twinkleOffset) * 0.25;
+                this.currentOpacity = Math.max(0.05, Math.min(0.9, this.currentOpacity));
+            }
+            draw(ctx) {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fillStyle = this.hue;
+                ctx.globalAlpha = this.currentOpacity;
+                ctx.fill();
+                if (this.size > 1.2) {
+                    ctx.beginPath();
+                    ctx.arc(this.x, this.y, this.size * 2.5, 0, Math.PI * 2);
+                    ctx.fillStyle = this.hue;
+                    ctx.globalAlpha = this.currentOpacity * 0.15;
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        function initParticles() {
+            const count = Math.floor((w * h) / 6500);
+            particles = [];
+            for (let i = 0; i < Math.min(count, 200); i++) {
+                particles.push(new Particle());
+            }
+        }
+        initParticles();
+
+        function animate() {
+            ctx.clearRect(0, 0, w, h);
+            const nebulaGrad1 = ctx.createRadialGradient(w * 0.25, h * 0.3, 0, w * 0.25, h * 0.3, w * 0.5);
+            nebulaGrad1.addColorStop(0, 'rgba(77,168,255,0.03)');
+            nebulaGrad1.addColorStop(0.5, 'rgba(167,139,250,0.015)');
+            nebulaGrad1.addColorStop(1, 'transparent');
+            ctx.fillStyle = nebulaGrad1;
+            ctx.fillRect(0, 0, w, h);
+            const nebulaGrad2 = ctx.createRadialGradient(w * 0.7, h * 0.6, 0, w * 0.7, h * 0.6, w * 0.4);
+            nebulaGrad2.addColorStop(0, 'rgba(0,212,255,0.025)');
+            nebulaGrad2.addColorStop(0.5, 'rgba(52,211,153,0.012)');
+            nebulaGrad2.addColorStop(1, 'transparent');
+            ctx.fillStyle = nebulaGrad2;
+            ctx.fillRect(0, 0, w, h);
+            for (const p of particles) {
+                p.update(mouseX, mouseY);
+                p.draw(ctx);
+            }
+            for (let i = 0; i < particles.length; i++) {
+                for (let j = i + 1; j < particles.length; j++) {
+                    const dx = particles[i].x - particles[j].x;
+                    const dy = particles[i].y - particles[j].y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 80) {
+                        ctx.beginPath();
+                        ctx.moveTo(particles[i].x, particles[i].y);
+                        ctx.lineTo(particles[j].x, particles[j].y);
+                        ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+                        ctx.lineWidth = 0.5;
+                        ctx.stroke();
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        animate();
+
+        document.addEventListener('mousemove', (e) => {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            const glow = document.getElementById('cursor-glow');
+            glow.style.left = e.clientX + 'px';
+            glow.style.top = e.clientY + 'px';
+            glow.style.opacity = '1';
+        });
+        document.addEventListener('mouseleave', () => {
+            mouseX = -500;
+            mouseY = -500;
+            document.getElementById('cursor-glow').style.opacity = '0';
+        });
+
+        /* ───────────────────────────────
+           AUTO-COUNT PROJECTS
+           ─────────────────────────────── */
+        function updateProjectCount() {
+            const projects = document.querySelectorAll('.project-item');
+            const countEl = document.getElementById('project-count');
+            if (countEl && projects.length > 0) {
+                countEl.textContent = projects.length;
+            }
+        }
+        document.addEventListener('DOMContentLoaded', updateProjectCount);
+        setTimeout(updateProjectCount, 100);
+
+        /* ───────────────────────────────
+           NAV ACTIVE STATE
+           ─────────────────────────────── */
+        const sectionIds = ['research', 'projects', 'stack', 'collaborate'];
+        const navAs = document.querySelectorAll('.nav-links a');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+                if (e.isIntersecting) {
+                    navAs.forEach(a => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+                }
+            });
+        }, {
+            threshold: 0.35
+        });
+        sectionIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) observer.observe(el);
+        });
+
+        /* ───────────────────────────────
+           PAPER EXPLAINER DATA
+           ─────────────────────────────── */
+        const paperData = {
+            paper1: {
+                title: 'Failure Geometry in Object Detection',
+                id: 'PAPER-01 · IEEE ACCESS',
+                status: 'Writing Phase',
+                statusColor: '#f59e0b',
+                overview: 'This research introduces a <strong>4D failure vector framework</strong> that systematically characterizes how object detection models fail under real-world corruptions. We evaluate YOLOv8, DETR, and RT-DETR across <strong>17 corruption types</strong> using our novel <strong>mCRS metric</strong> (mean Corruption Robustness Score), and stress-test the resulting taxonomy across two independent datasets.',
+                visualTitle: '4D Failure Geometry — Corruption → Detection → mCRS',
+                methodology: 'Each model is tested under 17 corruption categories (noise, blur, weather, digital) at 5 severity levels on COCO val2017 and Pascal VOC. The 4D failure vector decomposes degradation into <strong>recall loss (ΔR), false-positive inflation (ΔP), localisation error (ΔL) and calibration drift (ΔE)</strong>. mCRS aggregates all four into a single robustness score, and a Ridge-regression transfer analysis tests which dimensions survive the jump from one dataset to another.',
+                metrics: [{
+                    val: '4D',
+                    lbl: 'Failure Vector'
+                }, {
+                    val: '17',
+                    lbl: 'Corruption Types'
+                }, {
+                    val: '4',
+                    lbl: 'Detectors'
+                }, {
+                    val: 'mCRS',
+                    lbl: 'New Metric'
+                }, ],
+                keyFinding: 'RT-DETR is the most robust architecture on both COCO and VOC, but DETR\'s ranking collapses on VOC — ΔR and ΔL transfer reliably across datasets (R²=0.84–0.95) while ΔP (hallucination) does not, explaining exactly which failure modes generalise.',
+                pdfFile: 'https://drive.google.com/uc?export=download&id=1_4viuWqAJymywDXWedJm2QwAHLx8Z3Jl',
+                diagramHTML: `
+                    <div class="pipeline-diagram">
+                        <div class="pipeline-row-label">Corruption → Detection → Failure Decomposition</div>
+                        <div class="pipeline-row">
+                            <div class="flow-box" style="--box-color:#4da8ff"><div class="fb-title">Clean Image I</div><div class="fb-sub">COCO · VOC</div></div>
+                            <div class="flow-arrow" style="--line-color:#4da8ff"><div class="fa-line"></div><div class="fa-dot"></div></div>
+                            <div class="flow-box" style="--box-color:#00d4ff"><div class="fb-title">Corruption C(I,s)</div><div class="fb-sub">17 types × 5 severities</div></div>
+                            <div class="flow-arrow" style="--line-color:#00d4ff"><div class="fa-line"></div><div class="fa-dot"></div></div>
+                            <div class="flow-box" style="--box-color:#a78bfa"><div class="fb-title">Detector M</div><div class="fb-sub">YOLOv8n · YOLOv9c · DETR · RT-DETR</div></div>
+                            <div class="flow-arrow" style="--line-color:#a78bfa"><div class="fa-line"></div><div class="fa-dot"></div></div>
+                            <div class="flow-box" style="--box-color:#f59e0b"><div class="fb-title">Failure Vector F</div><div class="fb-sub">[ΔR, ΔP, ΔL, ΔE]</div></div>
+                            <div class="flow-arrow" style="--line-color:#f59e0b"><div class="fa-line"></div><div class="fa-dot"></div></div>
+                            <div class="flow-box" style="--box-color:#34d399"><div class="fb-title">mCRS</div><div class="fb-sub">Robustness Score</div></div>
+                        </div>
+                        <div class="flow-branches">
+                            <div class="flow-branch"><div class="flow-vline" style="--line-color:#f59e0b"><div class="fv-dot"></div></div><div class="flow-box" style="--box-color:#f59e0b;min-width:74px;"><div class="fb-title">ΔR</div><div class="fb-sub">Recall loss</div></div></div>
+                            <div class="flow-branch"><div class="flow-vline" style="--line-color:#fb923c"><div class="fv-dot"></div></div><div class="flow-box" style="--box-color:#fb923c;min-width:74px;"><div class="fb-title">ΔP</div><div class="fb-sub">Hallucination</div></div></div>
+                            <div class="flow-branch"><div class="flow-vline" style="--line-color:#f472b6"><div class="fv-dot"></div></div><div class="flow-box" style="--box-color:#f472b6;min-width:74px;"><div class="fb-title">ΔL</div><div class="fb-sub">Localisation (GIoU)</div></div></div>
+                            <div class="flow-branch"><div class="flow-vline" style="--line-color:#a78bfa"><div class="fv-dot"></div></div><div class="flow-box" style="--box-color:#a78bfa;min-width:74px;"><div class="fb-title">ΔE</div><div class="fb-sub">Calibration (ECE)</div></div></div>
+                        </div>
+                        <div class="pipeline-row-label" style="margin-top:6px;">Cross-Dataset Transfer</div>
+                        <div class="pipeline-row">
+                            <div class="flow-box" style="--box-color:#4da8ff"><div class="fb-title">COCO val2017</div><div class="fb-sub">5,000 images</div></div>
+                            <div class="flow-arrow" style="--line-color:#00d4ff"><div class="fa-line"></div><div class="fa-dot"></div></div>
+                            <div class="flow-box" style="--box-color:#34d399"><div class="fb-title">Ridge Transfer</div><div class="fb-sub">leave-one-corruption-out</div></div>
+                            <div class="flow-arrow" style="--line-color:#00d4ff"><div class="fa-line"></div><div class="fa-dot"></div></div>
+                            <div class="flow-box" style="--box-color:#4da8ff"><div class="fb-title">Pascal VOC</div><div class="fb-sub">20 categories</div></div>
+                        </div>
+                        <div class="flow-caption">ΔR &amp; ΔL transfer strongly (<strong>R²=0.84–0.95</strong>); ΔP &amp; ΔE transfer weakly — the FGTS metric turns this into a per-architecture taxonomy-stability score.</div>
+                    </div>
+                `,
+            },
+            paper2: {
+                title: 'FairTree & Fairness Disconnect Index',
+                id: 'PAPER-02 · IEEE ACCESS',
+                status: 'Submission Ready',
+                statusColor: '#f59e0b',
+                overview: 'We demonstrate that <strong>routing fairness ≠ prediction fairness</strong> in Mixture-of-Experts (MoE) models. <strong>FairRoute++</strong> regularizes the latent, routing, and prediction stages jointly via multi-stage adversarial learning, and the <strong>Fairness Disconnect Index (FDI)</strong> quantifies the gap across 6 tabular benchmarks, 2 vision datasets, and a text-classification benchmark.',
+                visualTitle: 'FairRoute++ — Latent → Router → Fusion → Prediction',
+                methodology: 'A shared encoder produces latent Z; a softmax router turns Z into routing weights R over K experts, which are softly mixed and fused back with Z before prediction. Two gradient-reversal adversaries — one on Z, one on R — try to recover the sensitive attribute S, pushing the network to hide it at both stages. FDI then multiplies residual prediction-leakage AUC by how thoroughly routing was scrubbed of S, isolating leakage that survives despite fair-looking routing.',
+                metrics: [{
+                    val: 'FDI',
+                    lbl: 'New Metric'
+                }, {
+                    val: '9',
+                    lbl: 'Benchmarks'
+                }, {
+                    val: 'MoE',
+                    lbl: 'Architecture'
+                }, {
+                    val: 'GRL',
+                    lbl: 'Adversary'
+                }, ],
+                keyFinding: 'Routing MI can fall >95% under regularization while Leakage AUC barely moves — demographic signal simply reroutes through the latent path. FDI catches this "Fairness Disconnect" across tabular, vision, and text modalities alike.',
+                pdfFile: 'https://drive.google.com/uc?export=download&id=1nBZZ0fMoq2Ue9mSzXRLWSsDhBGC5Tn9Z',
+                diagramHTML: `
+                    <div class="pipeline-diagram">
+                        <div class="pipeline-row-label">FairRoute++ Forward Pass</div>
+                        <div class="pipeline-row">
+                            <div class="flow-box" style="--box-color:#4da8ff"><div class="fb-title">Input X</div></div>
+                            <div class="flow-arrow" style="--line-color:#4da8ff"><div class="fa-line"></div><div class="fa-dot"></div></div>
+                            <div class="flow-box" style="--box-color:#00d4ff"><div class="fb-title">Encoder f_θ</div></div>
+                            <div class="flow-arrow" style="--line-color:#00d4ff"><div class="fa-line"></div><div class="fa-dot"></div></div>
+                            <div class="flow-box" style="--box-color:#f59e0b"><div class="fb-title">Latent Z</div></div>
+                            <div class="flow-arrow" style="--line-color:#f59e0b"><div class="fa-line"></div><div class="fa-dot"></div></div>
+                            <div class="flow-box" style="--box-color:#34d399"><div class="fb-title">Router</div></div>
+                            <div class="flow-arrow" style="--line-color:#34d399"><div class="fa-line"></div><div class="fa-dot"></div></div>
+                            <div class="flow-box" style="--box-color:#a78bfa"><div class="fb-title">Routing R</div></div>
+                            <div class="flow-arrow" style="--line-color:#a78bfa"><div class="fa-line"></div><div class="fa-dot"></div></div>
+                            <div class="flow-box" style="--box-color:#f472b6"><div class="fb-title">Experts ×K + Fusion</div><div class="fb-sub">[Z ‖ Σ rₖeₖ]</div></div>
+                            <div class="flow-arrow" style="--line-color:#f472b6"><div class="fa-line"></div><div class="fa-dot"></div></div>
+                            <div class="flow-box" style="--box-color:#4da8ff"><div class="fb-title">Prediction ŷ</div></div>
+                        </div>
+                        <div class="flow-branches">
+                            <div class="flow-branch"><div class="flow-vline" style="--line-color:#a78bfa"><div class="fv-dot"></div></div><div class="flow-box" style="--box-color:#a78bfa;"><div class="fb-title">Adversary A_Z</div><div class="fb-sub">GRL(Z) → Ŝ</div></div></div>
+                            <div class="flow-branch"><div class="flow-vline" style="--line-color:#a78bfa"><div class="fv-dot"></div></div><div class="flow-box" style="--box-color:#a78bfa;"><div class="fb-title">Adversary A_R</div><div class="fb-sub">GRL(R) → Ŝ</div></div></div>
+                        </div>
+                        <div class="pipeline-row-label" style="margin-top:6px;">Fairness Disconnect Index</div>
+                        <div class="pipeline-row">
+                            <div class="flow-box" style="--box-color:#f472b6"><div class="fb-title">Leakage AUC(ŷ)</div><div class="fb-sub">external probe on prediction</div></div>
+                            <div class="flow-arrow" style="--line-color:#f472b6"><div class="fa-line"></div><div class="fa-dot"></div></div>
+                            <div class="flow-box" style="--box-color:#34d399"><div class="fb-title">FDI</div><div class="fb-sub">= L · (1 − α)</div></div>
+                            <div class="flow-arrow" style="--line-color:#a78bfa"><div class="fa-line"></div><div class="fa-dot"></div></div>
+                            <div class="flow-box" style="--box-color:#a78bfa"><div class="fb-title">I(R;S) / I(X;S)</div><div class="fb-sub">routing attenuation α</div></div>
+                        </div>
+                        <div class="flow-caption">Even when I(R;S) is driven to ~0 (a clean-looking router), Leakage AUC on ŷ stays high — exactly the disconnect FDI is built to catch.</div>
+                    </div>
+                `,
+            },
+            paper3: {
+                title: 'Cross-Lingual Safety in LLMs',
+                id: 'PAPER-03 · EMNLP WS',
+                status: 'In Progress',
+                statusColor: '#4da8ff',
+                overview: 'Using <strong>mechanistic interpretability</strong>, we probe safety-alignment differences between <strong>Apertus 8B</strong> and <strong>Llama-3 8B</strong> across English and Gujarati. We introduce <strong>CLGI</strong> (Cross-Lingual Guard Invariance) as a safety metric, and use causal activation patching to test whether English refusal circuits transfer to Gujarati.',
+                visualTitle: 'Refusal-Circuit Probe — EN vs GU',
+                methodology: 'Parallel English/Gujarati prompts are pushed through both models while hooking the residual stream at all 32 layers. A Sparse Autoencoder decomposes activations into interpretable features, from which a difference-in-means refusal direction is extracted per language. Activation patching then injects the English refusal vector into a Gujarati forward pass to test causal, not just correlational, transfer — with IndicTrans2 auditing translation quality throughout.',
+                metrics: [{
+                    val: 'CLGI',
+                    lbl: 'New Metric'
+                }, {
+                    val: '2',
+                    lbl: 'LLMs Compared'
+                }, {
+                    val: '32',
+                    lbl: 'Layers Hooked'
+                }, {
+                    val: 'IndicTrans2',
+                    lbl: 'Translator'
+                }, ],
+                keyFinding: 'Safety alignment drops significantly in Gujarati for both models, but Apertus 8B retains 28% higher guard invariance than Llama-3 8B — suggesting pretraining data diversity, not just alignment tuning, shapes cross-lingual refusal robustness.',
+                pdfFile: 'papers/cross-lingual-safety.pdf',
+                diagramHTML: `
+                    <div class="pipeline-diagram">
+                        <div class="pipeline-row-label">Mechanistic Probe Pipeline</div>
+                        <div class="pipeline-row">
+                            <div class="flow-box" style="--box-color:#4da8ff"><div class="fb-title">Prompts</div><div class="fb-sub">English + Gujarati (parallel)</div></div>
+                            <div class="flow-arrow" style="--line-color:#4da8ff"><div class="fa-line"></div><div class="fa-dot"></div></div>
+                            <div class="flow-box" style="--box-color:#00d4ff"><div class="fb-title">Apertus-8B / Llama-3-8B</div><div class="fb-sub">residual stream, 32 layers</div></div>
+                            <div class="flow-arrow" style="--line-color:#00d4ff"><div class="fa-line"></div><div class="fa-dot"></div></div>
+                            <div class="flow-box" style="--box-color:#a78bfa"><div class="fb-title">SAE Decomposition</div><div class="fb-sub">sparse interpretable features</div></div>
+                            <div class="flow-arrow" style="--line-color:#a78bfa"><div class="fa-line"></div><div class="fa-dot"></div></div>
+                            <div class="flow-box" style="--box-color:#f59e0b"><div class="fb-title">Refusal Direction</div><div class="fb-sub">EN vs GU, cosine sim.</div></div>
+                            <div class="flow-arrow" style="--line-color:#f59e0b"><div class="fa-line"></div><div class="fa-dot"></div></div>
+                            <div class="flow-box" style="--box-color:#34d399"><div class="fb-title">CLGI</div><div class="fb-sub">Guard Invariance Score</div></div>
+                        </div>
+                        <div class="flow-branches">
+                            <div class="flow-branch"><div class="flow-vline" style="--line-color:#f472b6"><div class="fv-dot"></div></div><div class="flow-box" style="--box-color:#f472b6;"><div class="fb-title">Activation Patching</div><div class="fb-sub">inject EN refusal vector into GU pass</div></div></div>
+                            <div class="flow-branch"><div class="flow-vline" style="--line-color:#4da8ff"><div class="fv-dot"></div></div><div class="flow-box" style="--box-color:#4da8ff;"><div class="fb-title">IndicTrans2</div><div class="fb-sub">EN→GU translation audit</div></div></div>
+                        </div>
+                        <div class="flow-caption">Causal patching tests whether an <strong>English refusal vector</strong> forces a Gujarati rejection — separating genuine cross-lingual safety transfer from surface-level coincidence.</div>
+                    </div>
+                `,
+            },
+        };
+
+        /* ───────────────────────────────
+           OPEN EXPLAINER
+           ─────────────────────────────── */
+        function openExplainer(paperKey) {
+            const data = paperData[paperKey];
+            if (!data) return;
+            const overlay = document.getElementById('explainer-overlay');
+            const content = document.getElementById('explainer-content');
+
+            content.innerHTML = `
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px;">
+              <span style="display:inline-block;width:7px;height:7px;border-radius:50%;background:${data.statusColor};box-shadow:0 0 10px ${data.statusColor};"></span>
+              <span style="font-family:var(--font-mono);font-size:9px;color:${data.statusColor};letter-spacing:0.12em;">${data.status}</span>
+            </div>
+            <span style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:0.15em;">${data.id}</span>
+            <h2 style="font-size:22px;font-weight:700;color:#fff;margin:8px 0 12px;line-height:1.2;">${data.title}</h2>
+            <p style="font-size:13px;color:var(--text-secondary);line-height:1.75;margin-bottom:16px;">${data.overview}</p>
+
+            <div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;">
+              <a href="${data.pdfFile}" download class="btn-stellar" style="padding:10px 20px;font-size:10px;text-decoration:none;">
+                📄 Download Full PDF
+              </a>
+              <button onclick="closeExplainer()" class="btn-orbital" style="padding:10px 20px;font-size:10px;cursor:pointer;">
+                ✕ Close
+              </button>
+            </div>
+
+            <div class="explainer-visual" style="flex-direction:column;align-items:stretch;">
+              <div style="font-family:var(--font-mono);font-size:9px;color:var(--text-muted);letter-spacing:0.1em;margin-bottom:10px;text-align:center;">📐 ${data.visualTitle}</div>
+              ${data.diagramHTML}
+            </div>
+
+            <div class="explainer-section">
+              <h4>🔬 Methodology</h4>
+              <p>${data.methodology}</p>
+            </div>
+
+            <div class="explainer-metric-row">
+              ${data.metrics.map(m => `
+                <div class="explainer-metric">
+                  <div class="m-val">${m.val}</div>
+                  <div class="m-lbl">${m.lbl}</div>
+                </div>
+              `).join('')}
+            </div>
+
+            <div class="explainer-section">
+              <h4>💡 Key Finding</h4>
+              <p>${data.keyFinding}</p>
+            </div>
+
+            <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border-subtle);display:flex;gap:10px;flex-wrap:wrap;">
+              <a href="${data.pdfFile}" download class="btn-stellar" style="padding:10px 20px;font-size:10px;text-decoration:none;">
+                📄 Download PDF
+              </a>
+              <button onclick="closeExplainer()" class="btn-orbital" style="padding:10px 20px;font-size:10px;cursor:pointer;">
+                ✕ Close
+              </button>
+            </div>
+          `;
+
+            overlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeExplainer(event) {
+            if (event && event.target !== document.getElementById('explainer-overlay')) return;
+            const overlay = document.getElementById('explainer-overlay');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const overlay = document.getElementById('explainer-overlay');
+                if (overlay.classList.contains('active')) {
+                    closeExplainer();
+                }
+            }
+        });
+
+        /* ───────────────────────────────
+           CONTACT FORM → EMAIL
+           ─────────────────────────────── */
+        const SCRIPT_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+
+        async function sendMessage() {
+            const name = document.getElementById('msg-name').value.trim();
+            const email = document.getElementById('msg-email').value.trim();
+            const subject = document.getElementById('msg-subject').value.trim();
+            const message = document.getElementById('msg-body').value.trim();
+            const status = document.getElementById('form-status');
+            const btnText = document.getElementById('btn-text');
+
+            status.className = 'form-status-msg';
+            status.style.display = 'none';
+
+            if (!name || !email || !message) {
+                status.textContent = '⚠ Please fill in name, email, and message.';
+                status.className = 'form-status-msg error';
+                status.style.display = 'block';
+                return;
+            }
+            if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                status.textContent = '⚠ Please enter a valid email address.';
+                status.className = 'form-status-msg error';
+                status.style.display = 'block';
+                return;
+            }
+
+            if (SCRIPT_URL === "PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE") {
+                btnText.textContent = 'Sending...';
+                await new Promise(r => setTimeout(r, 1200));
+                btnText.textContent = 'Sent! ✓';
+                status.textContent = '✓ Collaboration request received! (Demo mode — set up Google Apps Script for real email delivery)';
+                status.className = 'form-status-msg success';
+                status.style.display = 'block';
+                setTimeout(() => {
+                    btnText.textContent = 'Send Collaboration Request';
+                    document.getElementById('msg-name').value = '';
+                    document.getElementById('msg-email').value = '';
+                    document.getElementById('msg-subject').value = '';
+                    document.getElementById('msg-body').value = '';
+                    status.style.display = 'none';
+                }, 4000);
+                return;
+            }
+
+            btnText.textContent = 'Sending...';
+            try {
+                await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, subject, message }),
+                });
+                btnText.textContent = 'Sent! ✓';
+                status.textContent = '✓ Collaboration request delivered! I\'ll respond within 24 hours.';
+                status.className = 'form-status-msg success';
+                status.style.display = 'block';
+                document.getElementById('msg-name').value = '';
+                document.getElementById('msg-email').value = '';
+                document.getElementById('msg-subject').value = '';
+                document.getElementById('msg-body').value = '';
+                setTimeout(() => {
+                    btnText.textContent = 'Send Collaboration Request';
+                    status.style.display = 'none';
+                }, 4000);
+            } catch (err) {
+                btnText.textContent = 'Send Collaboration Request';
+                status.textContent = '✗ Error. Please email directly: thakerparth12@gmail.com';
+                status.className = 'form-status-msg error';
+                status.style.display = 'block';
+            }
+        }
+
+        document.querySelectorAll('.form-cosmic input').forEach(inp => {
+            inp.addEventListener('keydown', e => { if (e.key === 'Enter') sendMessage(); });
+        });
+
+        /* ================================================================= */
+        /* NEW: AETHOR CHAT POPUP INTEGRATION (Replacing old Brain Modal JS) */
+        /* ================================================================= */
+        const aethorBtn = document.getElementById('aethor-round-btn');
+        const aethorPopup = document.getElementById('aethor-chat-container');
+        const aethorCloseBtn = document.getElementById('aethor-close-btn');
+
+        aethorBtn.addEventListener('click', () => {
+            aethorPopup.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        });
+
+        aethorCloseBtn.addEventListener('click', closeAethorPopup);
+        aethorPopup.addEventListener('click', (e) => {
+            if (e.target === aethorPopup) closeAethorPopup();
+        });
+
+        function closeAethorPopup() {
+            aethorPopup.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+        /* ================================================================= */
+
+        console.log('%c🛰️ Aether Observatory %cOnline',
+            'color:#00d4ff;font-size:18px;font-family:monospace;',
+            'color:#34d399;font-size:12px;font-family:monospace;');
+        console.log('%cParth Thaker — Sovereign Reliability Framework',
+            'color:#a78bfa;font-size:10px;font-family:monospace;');
+        console.log('%c📄 Paper PDFs: Google Drive direct download links configured.',
+            'color:#f59e0b;font-size:10px;font-family:monospace;');
+        console.log('%c📑 CV: Google Drive direct download link configured.',
+            'color:#f59e0b;font-size:10px;font-family:monospace;');
+        console.log('%c📧 Set SCRIPT_URL in sendMessage() for real email delivery.',
+            'color:#f59e0b;font-size:10px;font-family:monospace;');
+        console.log('%c📊 Projects auto-count: ' + document.querySelectorAll('.project-item').length + ' project(s) found.',
+            'color:#34d399;font-size:10px;font-family:monospace;');
+    </script>
+</body>
+
+</html>
