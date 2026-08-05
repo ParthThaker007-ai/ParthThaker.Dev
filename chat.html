@@ -4,80 +4,364 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aethor Terminal</title>
-    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono&display=swap" rel="stylesheet">
+    <meta name="color-scheme" content="dark">
+    <title>Aethor — Paper Research Terminal</title>
+    <meta name="description" content="Ask Aethor anything about Parth Thaker's research papers — multilingual RAG assistant.">
+    <link rel="icon" href="logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body {
+         :root {
+            --bg-deep: #020510;
+            --surface: rgba(10, 16, 36, 0.72);
+            --surface-solid: #0a1024;
+            --text-primary: #e8edf8;
+            --text-secondary: #b0bdd4;
+            --text-muted: #5a6880;
+            --accent-blue: #4da8ff;
+            --accent-cyan: #00d4ff;
+            --accent-purple: #a78bfa;
+            --accent-amber: #f59e0b;
+            --accent-rose: #f47272;
+            --border-subtle: rgba(77, 168, 255, 0.14);
+            --border-glow: rgba(77, 168, 255, 0.3);
+            --font-mono: 'JetBrains Mono', monospace;
+            --font-sans: 'Plus Jakarta Sans', sans-serif;
+        }
+        
+        * {
             margin: 0;
             padding: 0;
-            background: #020510;
-            font-family: 'JetBrains Mono', monospace;
-            color: #d4d4d4;
-            height: 100vh;
+            box-sizing: border-box;
+        }
+        
+        html,
+        body {
+            height: 100%;
+        }
+        
+        body {
+            background: var(--bg-deep);
+            font-family: var(--font-sans);
+            color: var(--text-primary);
             display: flex;
             flex-direction: column;
             overflow: hidden;
-            box-sizing: border-box;
+            position: relative;
         }
-        /* Terminal UI */
+        /* ambient glow backdrop */
+        
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse 60% 40% at 20% 0%, rgba(77, 168, 255, 0.08), transparent 60%), radial-gradient(ellipse 50% 40% at 100% 100%, rgba(167, 139, 250, 0.07), transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        /* ───── HEADER ───── */
+        
+        #term-header {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-subtle);
+            box-shadow: 0 0 30px rgba(77, 168, 255, 0.08);
+        }
+        
+        #term-header .logo-mark {
+            width: 30px;
+            height: 30px;
+            border-radius: 9px;
+            object-fit: cover;
+            box-shadow: 0 0 14px rgba(0, 212, 255, 0.4);
+            border: 1px solid var(--border-glow);
+            flex-shrink: 0;
+            background: #060d1f;
+        }
+        
+        #term-header .header-text {
+            display: flex;
+            flex-direction: column;
+            line-height: 1.25;
+        }
+        
+        #term-header .header-title {
+            font-family: var(--font-mono);
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            background: linear-gradient(120deg, var(--accent-cyan), var(--accent-blue), var(--accent-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        #term-header .header-sub {
+            font-family: var(--font-mono);
+            font-size: 9.5px;
+            color: var(--text-muted);
+            letter-spacing: 0.08em;
+        }
+        
+        #term-header .header-status {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-family: var(--font-mono);
+            font-size: 9px;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+            white-space: nowrap;
+        }
+        
+        .status-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #34d399;
+            box-shadow: 0 0 8px #34d399;
+            animation: pulse-dot 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-dot {
+            0%,
+            100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.4;
+            }
+        }
+        /* ───── CHAT BODY ───── */
         
         #terminal-body {
+            position: relative;
+            z-index: 1;
             flex: 1;
-            padding: 16px;
+            padding: 22px 16px;
             overflow-y: auto;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 18px;
         }
         
         #terminal-body::-webkit-scrollbar {
-            width: 4px;
+            width: 5px;
+        }
+        
+        #terminal-body::-webkit-scrollbar-track {
+            background: transparent;
         }
         
         #terminal-body::-webkit-scrollbar-thumb {
-            background: #00ff00;
-            border-radius: 2px;
+            background: rgba(77, 168, 255, 0.3);
+            border-radius: 10px;
         }
         
-        .term-line {
-            font-size: 13px;
-            line-height: 1.6;
+        .msg-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            max-width: 720px;
+            width: 100%;
+            margin: 0 auto;
+            animation: msg-in 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+        
+        @keyframes msg-in {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .msg-row.user {
+            flex-direction: row-reverse;
+        }
+        
+        .avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 10px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            border: 1px solid var(--border-glow);
+        }
+        
+        .avatar-bot {
+            background: #060d1f;
+            box-shadow: 0 0 14px rgba(0, 212, 255, 0.35);
+        }
+        
+        .avatar-bot img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .avatar-user {
+            background: rgba(245, 158, 11, 0.12);
+            border-color: rgba(245, 158, 11, 0.4);
+            box-shadow: 0 0 14px rgba(245, 158, 11, 0.25);
+            color: var(--accent-amber);
+        }
+        
+        .avatar-user svg {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .msg-col {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+        }
+        
+        .msg-row.user .msg-col {
+            align-items: flex-end;
+        }
+        
+        .msg-label {
+            font-family: var(--font-mono);
+            font-size: 9px;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            padding: 0 2px;
+        }
+        
+        .msg-bubble {
+            font-size: 13.5px;
+            line-height: 1.65;
+            padding: 11px 15px;
+            border-radius: 14px;
+            max-width: 100%;
+            white-space: pre-wrap;
             word-wrap: break-word;
         }
         
-        .term-system {
-            color: #5a6880;
-            font-style: italic;
+        .msg-row.bot .msg-bubble {
+            background: var(--surface);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border-subtle);
+            border-top-left-radius: 4px;
+            color: var(--text-primary);
         }
         
-        .tag-bot {
-            color: #00d4ff;
-            font-weight: bold;
+        .msg-row.user .msg-bubble {
+            background: linear-gradient(135deg, rgba(77, 168, 255, 0.16), rgba(0, 212, 255, 0.1));
+            border: 1px solid rgba(77, 168, 255, 0.3);
+            border-top-right-radius: 4px;
+            color: #fff;
         }
         
-        .tag-user {
-            color: #f59e0b;
-            font-weight: bold;
+        .msg-bubble.error {
+            border-color: rgba(244, 114, 114, 0.4);
+            background: rgba(244, 114, 114, 0.08);
+            color: #ffb3b3;
         }
         
-        .term-error {
-            color: #ff5555;
+        .msg-bubble.system {
+            border-style: dashed;
+            color: var(--text-secondary);
+            font-family: var(--font-mono);
+            font-size: 12px;
         }
+        /* thinking indicator */
         
-        .term-input-wrapper {
-            display: flex;
-            padding: 12px 16px;
-            background: #141a14;
-            border-top: 1px solid #00ff00;
+        .thinking-dots {
+            display: inline-flex;
+            gap: 4px;
             align-items: center;
-            gap: 12px;
+        }
+        
+        .thinking-dots span {
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--accent-cyan);
+            box-shadow: 0 0 6px var(--accent-cyan);
+            animation: dot-bounce 1.2s ease-in-out infinite;
+        }
+        
+        .thinking-dots span:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+        
+        .thinking-dots span:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+        
+        @keyframes dot-bounce {
+            0%,
+            60%,
+            100% {
+                transform: translateY(0);
+                opacity: 0.5;
+            }
+            30% {
+                transform: translateY(-4px);
+                opacity: 1;
+            }
+        }
+        /* ───── INPUT BAR ───── */
+        
+        #term-input-wrapper {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 14px 16px;
+            background: var(--surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border-subtle);
+        }
+        
+        .input-shell {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(10, 16, 36, 0.7);
+            border: 1px solid var(--border-subtle);
+            border-radius: 14px;
+            padding: 4px 6px 4px 14px;
+            max-width: 720px;
+            margin: 0 auto;
+            width: 100%;
+            transition: border-color 0.25s, box-shadow 0.25s;
+        }
+        
+        .input-shell:focus-within {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 0 20px rgba(0, 212, 255, 0.18);
         }
         
         .term-prompt {
-            color: #00ff00;
-            font-size: 13px;
-            font-weight: bold;
-            white-space: nowrap;
+            color: var(--accent-cyan);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            font-weight: 700;
+            flex-shrink: 0;
         }
         
         #term-input {
@@ -85,55 +369,185 @@
             background: transparent;
             border: none;
             outline: none;
-            color: #ffffff;
-            font-family: 'JetBrains Mono', monospace;
-            font-size: 13px;
+            color: #fff;
+            font-family: var(--font-sans);
+            font-size: 13.5px;
+            min-width: 0;
         }
         
         #term-input::placeholder {
-            color: #4a5a6a;
+            color: var(--text-muted);
+        }
+        
+        #send-btn {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            border: none;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-cyan));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            flex-shrink: 0;
+            transition: transform 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 16px rgba(77, 168, 255, 0.35);
+        }
+        
+        #send-btn:hover {
+            transform: translateY(-1px) scale(1.04);
+            box-shadow: 0 0 24px rgba(77, 168, 255, 0.5);
+        }
+        
+        #send-btn:active {
+            transform: scale(0.96);
+        }
+        
+        #send-btn svg {
+            width: 16px;
+            height: 16px;
+            color: #020510;
+        }
+        
+        #send-btn:disabled {
+            opacity: 0.45;
+            cursor: default;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        @media (max-width: 480px) {
+            #term-header {
+                padding: 12px 14px;
+            }
+            #term-header .header-title {
+                font-size: 12px;
+            }
+            .msg-bubble {
+                font-size: 13px;
+            }
         }
     </style>
 </head>
 
 <body>
-    <div id="terminal-body">
-        <div class="term-line term-system">[SYSTEM] Aethor RAG Terminal v1.0</div>
-        <div class="term-line term-system">[SYSTEM] Ready for queries. Type your question below.</div>
-    </div>
 
-    <div class="term-input-wrapper">
-        <span class="term-prompt">user@aether:~$</span>
-        <input type="text" id="term-input" autocomplete="off" placeholder="Ask about my research..." />
+    <!-- HEADER -->
+    <header id="term-header">
+        <img src="logo.png" alt="" class="logo-mark" onerror="this.style.display='none'">
+        <div class="header-text">
+            <span class="header-title">AETHOR</span>
+            <span class="header-sub">PAPER RESEARCH TERMINAL</span>
+        </div>
+        <div class="header-status">
+            <span class="status-dot"></span> ONLINE
+        </div>
+    </header>
+
+    <!-- CHAT BODY -->
+    <main id="terminal-body">
+        <div class="msg-row bot">
+            <div class="avatar avatar-bot">
+                <img src="aethor-icon.png" alt="Aethor" onerror="this.parentElement.innerHTML='✦'">
+            </div>
+            <div class="msg-col">
+                <span class="msg-label">Aethor</span>
+                <div class="msg-bubble system">System online. Ask me anything about Parth's research papers — failure geometry, fairness routing, or cross-lingual LLM safety.</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- INPUT -->
+    <div id="term-input-wrapper">
+        <div class="input-shell">
+            <span class="term-prompt">›</span>
+            <input type="text" id="term-input" autocomplete="off" placeholder="Ask about my research..." />
+        </div>
+        <button id="send-btn" aria-label="Send message">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M2 21l21-9L2 3v7l15 2-15 2v7z" />
+            </svg>
+        </button>
     </div>
 
     <script>
-        // 🔴 यहाँ अपना BACKEND API URL डालें (Example: http://localhost:5000/rag)
+        // 🔴 Backend API URL
         const BACKEND_API_URL = "https://parththaker-rag-backend.onrender.com/api/query";
+        // Which paper this terminal is scoped to — "all" searches across every paper
+        const PAPER_ID = "all";
 
         const termBody = document.getElementById('terminal-body');
         const termInput = document.getElementById('term-input');
+        const sendBtn = document.getElementById('send-btn');
 
-        function appendToTerminal(prefix, text, isError = false) {
-            const line = document.createElement('div');
-            line.className = `term-line ${isError ? 'term-error' : ''}`;
-            line.innerHTML = `<span class="${isError ? 'tag-bot' : prefix === 'USER' ? 'tag-user' : 'tag-bot'}">[${prefix}]:</span> ${text}`;
-            termBody.appendChild(line);
+        const userAvatarSVG = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>`;
+
+        function appendMessage(role, text, opts = {}) {
+            const row = document.createElement('div');
+            row.className = `msg-row ${role}`;
+
+            const avatar = document.createElement('div');
+            if (role === 'user') {
+                avatar.className = 'avatar avatar-user';
+                avatar.innerHTML = userAvatarSVG;
+            } else {
+                avatar.className = 'avatar avatar-bot';
+                avatar.innerHTML = `<img src="aethor-icon.png" alt="Aethor" onerror="this.parentElement.innerHTML='✦'">`;
+            }
+
+            const col = document.createElement('div');
+            col.className = 'msg-col';
+
+            const label = document.createElement('span');
+            label.className = 'msg-label';
+            label.textContent = role === 'user' ? 'You' : 'Aethor';
+
+            const bubble = document.createElement('div');
+            bubble.className = 'msg-bubble' + (opts.error ? ' error' : '') + (opts.system ? ' system' : '');
+            bubble.innerHTML = text;
+
+            col.appendChild(label);
+            col.appendChild(bubble);
+            row.appendChild(avatar);
+            row.appendChild(col);
+            termBody.appendChild(row);
             termBody.scrollTop = termBody.scrollHeight;
+            return bubble;
+        }
+
+        function appendThinking() {
+            const row = document.createElement('div');
+            row.className = 'msg-row bot';
+            row.id = 'thinking-row';
+
+            const avatar = document.createElement('div');
+            avatar.className = 'avatar avatar-bot';
+            avatar.innerHTML = `<img src="aethor-icon.png" alt="Aethor" onerror="this.parentElement.innerHTML='✦'">`;
+
+            const col = document.createElement('div');
+            col.className = 'msg-col';
+            col.innerHTML = `<span class="msg-label">Aethor</span>
+                <div class="msg-bubble"><span class="thinking-dots"><span></span><span></span><span></span></span></div>`;
+
+            row.appendChild(avatar);
+            row.appendChild(col);
+            termBody.appendChild(row);
+            termBody.scrollTop = termBody.scrollHeight;
+        }
+
+        function removeThinking() {
+            const row = document.getElementById('thinking-row');
+            if (row) row.remove();
         }
 
         async function handleTerminalSubmit() {
             const text = termInput.value.trim();
             if (!text) return;
 
-            appendToTerminal('USER', text);
+            appendMessage('user', escapeHtml(text));
             termInput.value = '';
-
-            const loadingLine = document.createElement('div');
-            loadingLine.className = 'term-line';
-            loadingLine.innerHTML = `<span class="tag-bot">[AETHOR]:</span> <span style="color:#5a6880">Processing query...</span>`;
-            termBody.appendChild(loadingLine);
-            termBody.scrollTop = termBody.scrollHeight;
+            sendBtn.disabled = true;
+            appendThinking();
 
             try {
                 const response = await fetch(BACKEND_API_URL, {
@@ -142,26 +556,48 @@
                         'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        message: text
+                        query: text,
+                        paper_id: PAPER_ID
                     })
                 });
-                loadingLine.remove();
 
-                if (!response.ok) throw new Error(`Server returned ${response.status}`);
+                removeThinking();
+
+                if (!response.ok) {
+                    let detail = `Server returned ${response.status}`;
+                    try {
+                        const errBody = await response.json();
+                        if (errBody && errBody.detail) detail = JSON.stringify(errBody.detail);
+                    } catch (_) {}
+                    throw new Error(detail);
+                }
+
                 const data = await response.json();
                 const botReply = data.response || data.answer || data.message || "No response.";
-                appendToTerminal('AETHOR', botReply);
+                appendMessage('bot', escapeHtml(botReply));
             } catch (error) {
-                loadingLine.remove();
-                appendToTerminal('ERROR', `Connection error: ${error.message}`, true);
+                removeThinking();
+                appendMessage('bot', `Connection error: ${escapeHtml(error.message)}`, {
+                    error: true
+                });
+            } finally {
+                sendBtn.disabled = false;
+                termInput.focus();
             }
+        }
+
+        function escapeHtml(str) {
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
         }
 
         termInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleTerminalSubmit();
         });
-        // Auto focus on load
-        setTimeout(() => termInput.focus(), 500);
+        sendBtn.addEventListener('click', handleTerminalSubmit);
+
+        setTimeout(() => termInput.focus(), 400);
     </script>
 </body>
 
