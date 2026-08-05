@@ -473,9 +473,8 @@
     <script>
         // 🔴 Backend API URL
         const BACKEND_API_URL = "https://parththaker-rag-backend.onrender.com/api/query";
-
-        // ✅ Which paper this terminal is scoped to — "all" searches across every paper
-        const paper_id = "all";
+        // Which paper this terminal is scoped to — "all" searches across every paper
+        const PAPER_ID = "all";
 
         const termBody = document.getElementById('terminal-body');
         const termInput = document.getElementById('term-input');
@@ -558,8 +557,7 @@
                     },
                     body: JSON.stringify({
                         query: text,
-                        // ✅ FIX: use the correct variable name (paper_id, not PAPER_ID)
-                        paper_id: paper_id
+                        paper_id: PAPER_ID
                     })
                 });
 
