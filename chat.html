@@ -12,6 +12,8 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        /* ===== your existing styles (unchanged) ===== */
+        
          :root {
             --bg-deep: #020510;
             --surface: rgba(10, 16, 36, 0.72);
@@ -50,7 +52,6 @@
             overflow: hidden;
             position: relative;
         }
-        /* ambient glow backdrop */
         
         body::before {
             content: '';
@@ -60,7 +61,6 @@
             pointer-events: none;
             z-index: 0;
         }
-        /* ───── HEADER ───── */
         
         #term-header {
             position: relative;
@@ -141,7 +141,6 @@
                 opacity: 0.4;
             }
         }
-        /* ───── CHAT BODY ───── */
         
         #terminal-body {
             position: relative;
@@ -284,7 +283,6 @@
             font-family: var(--font-mono);
             font-size: 12px;
         }
-        /* thinking indicator */
         
         .thinking-dots {
             display: inline-flex;
@@ -321,7 +319,6 @@
                 opacity: 1;
             }
         }
-        /* ───── INPUT BAR ───── */
         
         #term-input-wrapper {
             position: relative;
@@ -473,6 +470,7 @@
     <script>
         // 🔴 Backend API URL
         const BACKEND_API_URL = "https://parththaker-rag-backend.onrender.com/api/query";
+
         // Which paper this terminal is scoped to — "all" searches across every paper
         const PAPER_ID = "all";
 
@@ -550,15 +548,23 @@
             appendThinking();
 
             try {
+                // ✅ Build payload: omit paper_id if it's "all"
+                const payload = {
+                    query: text
+                };
+                if (PAPER_ID !== "all") {
+                    payload.paper_id = PAPER_ID;
+                }
+
+                // Optional: log what we're sending
+                console.log('📤 Sending payload:', payload);
+
                 const response = await fetch(BACKEND_API_URL, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({
-                        query: text,
-                        paper_id: PAPER_ID
-                    })
+                    body: JSON.stringify(payload)
                 });
 
                 removeThinking();
@@ -573,6 +579,8 @@
                 }
 
                 const data = await response.json();
+                console.log('📥 Received response:', data);
+
                 const botReply = data.response || data.answer || data.message || "No response.";
                 appendMessage('bot', escapeHtml(botReply));
             } catch (error) {
