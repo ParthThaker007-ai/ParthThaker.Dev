@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="color-scheme" content="dark" />
     <title>Parth Thaker — Aether Observatory</title>
+    <link rel="icon" type="image/png" href="logo.png" />
+    <link rel="shortcut icon" type="image/png" href="logo.png" />
+    <link rel="apple-touch-icon" href="logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -141,6 +144,13 @@
             font-size: 12px;
             letter-spacing: 0.15em;
             color: var(--accent-cyan);
+        }
+        
+        .nav-brand-logo {
+            width: 24px;
+            height: 24px;
+            object-fit: contain;
+            filter: drop-shadow(0 0 8px rgba(77, 168, 255, 0.55));
         }
         
         .nav-brand-dot {
@@ -454,6 +464,21 @@
             color: var(--text-muted);
             text-transform: uppercase;
             margin-top: 4px;
+        }
+        
+        .orbital-photo-wrap {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 18px;
+        }
+        
+        .orbital-photo {
+            width: 92px;
+            height: 92px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--accent-cyan);
+            box-shadow: var(--glow-cyan), 0 0 0 6px rgba(77, 168, 255, 0.08);
         }
         
         .orbital-field {
@@ -1518,6 +1543,7 @@
         <!-- NAV -->
         <nav class="nav-cosmic" aria-label="Main navigation">
             <div class="nav-brand">
+                <img src="logo.png" alt="Parth Thaker logo" class="nav-brand-logo" />
                 <div class="nav-brand-dot"></div>
                 P<span style="color:var(--text-muted)">.</span>THAKER
             </div>
@@ -1551,6 +1577,9 @@
             </div>
             <div class="orbital-card">
                 <div class="orbital-card-inner">
+                    <div class="orbital-photo-wrap">
+                        <img src="face.png" alt="Parth Thaker" class="orbital-photo" />
+                    </div>
                     <div style="font-family:var(--font-mono);font-size:10px;color:var(--accent-cyan);letter-spacing:0.12em;margin-bottom:14px;">
                         📡 TELEMETRY DATA
                     </div>
@@ -1816,8 +1845,8 @@
 
     <script>
         /* ───────────────────────────────
-                   COSMIC PARTICLE FIELD
-                   ─────────────────────────────── */
+                                   COSMIC PARTICLE FIELD
+                                   ─────────────────────────────── */
         const canvas = document.getElementById('cosmic-canvas');
         const ctx = canvas.getContext('2d');
         let particles = [];
@@ -2228,7 +2257,7 @@
         /* ───────────────────────────────
            CONTACT FORM → EMAIL
            ─────────────────────────────── */
-        const SCRIPT_URL = "PASTE_YOUR_GOOGLE_APPS_SCRIPT_URL_HERE";
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzqzHCznWxsY8FM28YQTUVDu-dEpyK_2P4z5-g5n76MZSISaqhH_HXpM2oE1kYESRUm/exec";
 
         async function sendMessage() {
             const name = document.getElementById('msg-name').value.trim();
